@@ -18,7 +18,8 @@ class EvoFlock:
     genotype_length: int = num_eyes**2
 
     creatures = [num_creatures]
-    predator = Predator
+    predator = Predator()
+
     @staticmethod
     def rng(n: int):
         """Returns a random integer between 0 and n-1."""
@@ -106,8 +107,9 @@ class EvoFlock:
 
         def update_eyes(self):
             """This method updates what each creature sees in each eye"""
-            self.predator_in_eye = self.which_eye(predator.x, predator.y)
+            self.predator_in_eye = self.which_eye(EvoFlock.predator.x, EvoFlock.predator.y)
             [1 if eye is self.eyes[self.predator_in_eye] else 1 for eye in self.eyes]
+
             for c in range(0, EvoFlock.num_creatures):
                 if EvoFlock.creatures[c] is not self:
                     self.eyes[self.which_eye(EvoFlock.creatures[c].x_position, EvoFlock.creatures[c].y_position)] += 1
@@ -137,4 +139,58 @@ class EvoFlock:
                     self.genotype[i] = mutation
 
     class Predator(Agent):
-        pass
+        def __init__(self):
+            self.speed = EvoFlock.predator_speed
+            self.nearest_creature: int = -1
+            self.nearest_creature_distance: float = 999
+            self.nearest_creature_heading: float = -1.0
+
+        def update_predator(self):
+            """This method finds the nearest creature to the predator and creates a new create via crossover
+            and mutation if the creature gets caught."""
+            for creature in range(EvoFlock.num_creatures):
+                dx: float = EvoFlock.creatures[creature].x_position - self.x_position
+                dx += 1 if dx < -0.5 else dx
+                dx -= 1 if dx > 0.5 else dx
+
+                dy: float = EvoFlock.creatures[creature].y_position - self.y_position
+                dy += 1 if dy < -0.5 else dy
+                dy -= 1 if dy > 0.5 else dy
+
+                d = math.sqrt((dx * dx) + (dy * dy))
+
+                if d < self.nearest_creature_distance:
+                    self.nearest_creature = creature
+                    self.nearest_creature_distance = d
+                    self.nearest_creature_heading = super().wrap_360(math.degrees(math.atan2(-dy, dx)))
+
+                if self.nearest_creature_distance < EvoFlock.creature_diameter:
+                    parent_a: int = 0
+                    parent_b: int = 0
+                    # Need to choose the creature that is not the one that just got caught
+                    while parent_a == self.nearest_creature:
+                        parent_a = random.randint(EvoFlock.num_creatures)
+
+                    while parent_b == self.nearest_creature:
+                        parent_b = random.randint(EvoFlock.num_creatures)
+
+                    EvoFlock.creatures[self.nearest_creature].crossover(parent_a, parent_b)
+                    EvoFlock.creatures[self.nearest_creature].mutate()
+                    EvoFlock.reproductions += 1
+
+                    self.randomize_position_and_heading()
+
+                else:
+                    self.heading = self.nearest_creature_heading
+                    self.update_position()
+
+    def main(self):
+        for c in range(EvoFlock.num_creatures):
+            EvoFlock.creatures[c].update_eyes()
+            EvoFlock.creatures[c].update_heading()
+            EvoFlock.creatures[c].update_position()
+        EvoFlock.predator.update_predator()
+        EvoFlock.counter += 1
+        if EvoFlock.counter %1000 == 0:
+            print("Counter = {counter}, Reproductions = {repos}".format(counter=EvoFlock.counter,
+                                                                        repos=EvoFlock.reproductions))
