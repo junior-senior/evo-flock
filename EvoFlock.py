@@ -1,8 +1,10 @@
 import random
 import math
 from decimal import Decimal
+
+
 class EvoFlock:
-    """EvoFlock is a simluation of a predator-prey scenario where the prey are subject to an Evolutionary Algorithm.
+    """EvoFlock is a simulation of a predator-prey scenario where the prey are subject to an Evolutionary Algorithm.
     Each time a prey is caught, a new one is produced via crossover and mutation."""
     def __init__(self):
         self.counter: int = 0
@@ -64,10 +66,6 @@ class Agent:
             divisible += 360
         elif divisible > 360:
             divisible -= 360
-        if divisible < 0:
-            print("Shit")
-        elif divisible > 360:
-            print("Double Shit")
         return divisible
 
     def randomize_position_and_heading(self):
@@ -93,7 +91,7 @@ class Agent:
 
 
 class Creature(Agent):
-    """This class defines the creatures or prey. It inherits from the Agent class."""
+    """This class defines the predators or prey. They inherits from the Agent class."""
     def __init__(self, evoflock):
         super().__init__()
         self.eyes = [0] * evoflock.num_eyes
