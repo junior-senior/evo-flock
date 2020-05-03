@@ -7,14 +7,18 @@ This is the front end for the application to visualise the evolutionary process.
 """
 import sys
 import random
+
 from PySide2 import QtGui, QtCore, QtWidgets
 import screeninfo
+
+import EvoFlock
 
 
 class UserInterface(QtWidgets.QWidget):
 
-    def __init__(self):
+    def __init__(self, evo_flock):
         super(UserInterface, self).__init__()
+        self.evo_flock = evo_flock
         self.init_ui()
 
     def init_ui(self):
@@ -27,7 +31,7 @@ class UserInterface(QtWidgets.QWidget):
                                                    screeninfo.get_monitors()[0].height)
         self.simulation_window_groupbox = QtWidgets.QGroupBox("Simulation")
 
-        self.graphics_container = QtWidgets.QGraphicsView()
+        self.graphics_container = QtWidgets.QGraphicsView(self.simulation_window_groupbox)
         self.scene = QtWidgets.QGraphicsScene()
         self.graphics_container.setScene(self.scene)
 
@@ -36,75 +40,76 @@ class UserInterface(QtWidgets.QWidget):
         self.main_window_layout.addWidget(self.simulation_window_groupbox)
         self.setLayout(self.main_window_layout)
 
-        #self.drawUniverse(self.simulation_window_groupbox.width, self.simulation_window_groupbox.height())
+        self.draw_world()
         self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.rePaint)
-
+        self.timer.timeout.connect(self.re_paint)
+        self.animate()
         self.show()
 
-    def startAnimation(self, universe):
+    def start_animation(self):
         """Start the animation timer.
         """
-        self.universe = universe
-        self.timer.start(100)
+        self.timer.start(1)
 
-    def stopAnimation(self):
+    def stop_animation(self):
         """Stop the animation timer.
         """
         self.timer.stop()
 
-    def rePaint(self):
+    def re_paint(self):
         """Animate the cell generations.
         """
-        self.clearScene()
-        univY, univX = self.universe.getDimension()
-        self.drawUniverse(univX, univY)
-        self.populateCells()
-        self.universe.nextGeneration()
+        self.evo_flock.main_loop()
+        self.clear_scene()
+        self.draw_world()
+        self.populate_world()
 
-    def clearScene(self):
+    def clear_scene(self):
         """Clear the scene.
         """
         self.scene.clear()
 
-    def drawUniverse(self):
-        """Draw the universe grid.
+    def draw_world(self):
+        """Create the world space.
         """
+        self.graphics_container.fitInView(self.scene.itemsBoundingRect())
 
-        self.fitInView(self.scene.itemsBoundingRect())
+    def populate_world(self):
+        """Draw the creatures.
+        """
+        # populate the grid with blue squares representing creatures
+        for creature in self.evo_flock.creatures:
+            self.draw_creatures(True, creature)  # Draw Creatures
+        self.draw_creatures(False, self.evo_flock.predator)  # Draw Predator
 
-    def paintEvent(self, e):
-        qp = QtGui.QPainter()
-        qp.begin(self)
-        self.draw_points(qp)
-        qp.end()
+    def draw_creatures(self, creature_or_predator, creature):
+        """Fill the cell at grid location (x, y)
+        """
+        x = creature.x_position
+        y = creature.y_position
+        world_left = self.simulation_window_groupbox.geometry().left() + 20
+        world_top = self.simulation_window_groupbox.geometry().top() + 20
+        world_right = self.simulation_window_groupbox.geometry().right() - 20
+        world_bottom = self.simulation_window_groupbox.geometry().bottom() - 20
+        creature_x_in_world = int(((world_right - world_left) * x) + world_left)
+        creature_y_in_world = int(((world_bottom - world_top) * y) + world_top)
+        item = QtWidgets.QGraphicsRectItem(creature_x_in_world, creature_y_in_world, 100, 100)
+        if creature_or_predator:
+            item.setBrush(QtGui.QBrush(QtCore.Qt.blue))
+        else:
+            item.setBrush(QtGui.QBrush(QtCore.Qt.red))
+        self.scene.addItem(item)
 
-    def draw_points(self, qp):
-        red_colour = QtGui.QColor(255, 0, 0)
-        red_colour.setNamedColor("red")
-        qp.setPen(QtCore.Qt.red)
-
-        size = self.size()
-        for i in range(1000):
-            x = random.randint(1, size.width() - 1)
-            y = random.randint(1, size.height() - 1)
-            qp.drawPoint(x, y)
-
-    def draw_prey_points(self, qp):
-        blue_colour = QtGui.QColor(0, 0, 255)
-        blue_colour.setNamedColor("blue")
-        qp.setPen(QtCore.Qt.blue)
-
-        size = self.size()
-        for i in range(1000):
-            x = random.randint(1, size.width() - 1)
-            y = random.randint(1, size.height() - 1)
-            qp.drawPoint(x, y)
+    def animate(self):
+        """Start animating the selected pattern.
+        """
+        self.start_animation()
 
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    ex = UserInterface()
+    evoflock = EvoFlock.EvoFlock()
+    ex = UserInterface(evoflock)
     sys.exit(app.exec_())
 
 
