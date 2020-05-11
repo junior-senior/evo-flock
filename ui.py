@@ -6,7 +6,6 @@ This is the front end for the application to visualise the evolutionary process.
 
 """
 import sys
-import random
 
 from PySide2 import QtGui, QtCore, QtWidgets
 import screeninfo
@@ -26,19 +25,26 @@ class UserInterface(QtWidgets.QWidget):
                          screeninfo.get_monitors()[0].width,
                          screeninfo.get_monitors()[0].height)
         self.setWindowTitle("EvoFlock")
+
+        #self.showFullScreen()
+
         self.user_settings_groupbox = QtWidgets.QGroupBox("Settings")
         self.user_settings_groupbox.setMaximumSize(int(screeninfo.get_monitors()[0].width/5),
                                                    screeninfo.get_monitors()[0].height)
         self.simulation_window_groupbox = QtWidgets.QGroupBox("Simulation")
 
-        self.graphics_container = QtWidgets.QGraphicsView(self.simulation_window_groupbox)
-        self.scene = QtWidgets.QGraphicsScene()
-        self.graphics_container.setScene(self.scene)
-
         self.main_window_layout = QtWidgets.QHBoxLayout()
         self.main_window_layout.addWidget(self.user_settings_groupbox)
         self.main_window_layout.addWidget(self.simulation_window_groupbox)
         self.setLayout(self.main_window_layout)
+
+        self.graphics_container = QtWidgets.QGraphicsView(self.simulation_window_groupbox)
+        self.scene = QtWidgets.QGraphicsScene()
+        self.graphics_container.setScene(self.scene)
+
+        self.sim_layout = QtWidgets.QGridLayout()
+        self.sim_layout.addWidget(self.graphics_container)
+        self.simulation_window_groupbox.setLayout(self.sim_layout)
 
         self.draw_world()
         self.timer = QtCore.QTimer()
@@ -49,7 +55,7 @@ class UserInterface(QtWidgets.QWidget):
     def start_animation(self):
         """Start the animation timer.
         """
-        self.timer.start(1)
+        self.timer.start(100)
 
     def stop_animation(self):
         """Stop the animation timer.
@@ -72,6 +78,11 @@ class UserInterface(QtWidgets.QWidget):
     def draw_world(self):
         """Create the world space.
         """
+        print()
+        self.scene.setSceneRect(QtCore.QRectF(0, 0,
+                                              self.simulation_window_groupbox.size().width() - 100,
+                                              self.simulation_window_groupbox.size().height() - 100))
+
         self.graphics_container.fitInView(self.scene.itemsBoundingRect())
 
     def populate_world(self):
@@ -87,13 +98,13 @@ class UserInterface(QtWidgets.QWidget):
         """
         x = creature.x_position
         y = creature.y_position
-        world_left = self.simulation_window_groupbox.geometry().left() + 20
-        world_top = self.simulation_window_groupbox.geometry().top() + 20
-        world_right = self.simulation_window_groupbox.geometry().right() - 20
-        world_bottom = self.simulation_window_groupbox.geometry().bottom() - 20
+        world_left = 0
+        world_top = 0
+        world_right = self.simulation_window_groupbox.size().width() - 100
+        world_bottom = self.simulation_window_groupbox.size().height() - 100
         creature_x_in_world = int(((world_right - world_left) * x) + world_left)
         creature_y_in_world = int(((world_bottom - world_top) * y) + world_top)
-        item = QtWidgets.QGraphicsRectItem(creature_x_in_world, creature_y_in_world, 100, 100)
+        item = QtWidgets.QGraphicsRectItem(creature_x_in_world, creature_y_in_world, 10, 10)
         if creature_or_predator:
             item.setBrush(QtGui.QBrush(QtCore.Qt.blue))
         else:
