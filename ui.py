@@ -78,7 +78,6 @@ class UserInterface(QtWidgets.QWidget):
     def draw_world(self):
         """Create the world space.
         """
-        print()
         self.scene.setSceneRect(QtCore.QRectF(0, 0,
                                               self.simulation_window_groupbox.size().width() - 100,
                                               self.simulation_window_groupbox.size().height() - 100))
@@ -90,7 +89,11 @@ class UserInterface(QtWidgets.QWidget):
         """
         # populate the grid with blue squares representing creatures
         for creature in self.evo_flock.creatures:
-            self.draw_creatures(True, creature)  # Draw Creatures
+            if self.evo_flock.creatures.index(creature) == self.evo_flock.closest_prey:
+                self.draw_creatures(True, creature)
+                print("Closest Prey:", self.evo_flock.closest_prey)
+            else:
+                self.draw_creatures(True, creature)  # Draw Creatures
         self.draw_creatures(False, self.evo_flock.predator)  # Draw Predator
 
     def draw_creatures(self, creature_or_predator, creature):

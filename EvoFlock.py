@@ -23,6 +23,8 @@ class EvoFlock:
         self.create_creatures()
         self.predator = Predator(self)
 
+        self.closest_prey = -1
+
     @staticmethod
     def random_int(n: int):
         """Returns a random integer between 0 and n-1."""
@@ -74,7 +76,7 @@ class Agent:
         self.x_position: float
         self.y_position: float
         self.speed: float = 0
-        self.heading: float
+        self.heading: float = 0
         self.randomize_position_and_heading()
 
     def wrap_360(self, h: float):
@@ -101,7 +103,7 @@ class Agent:
         elif self.x_position > 1:
             self.x_position -= 1
 
-        self.y_position += math.sin(math.radians(self.heading)) * self.speed
+        self.y_position -= math.sin(math.radians(self.heading)) * self.speed
         if self.y_position < 0:
             self.y_position += 1
         elif self.y_position > 1:
@@ -138,7 +140,6 @@ class Creature(Agent):
         """This method updates what each creature sees in each eye."""
         self.predator_in_eye = self.which_eye(self.evoflock.predator.x_position,
                                               self.evoflock.predator.y_position)
-
         for eye in range(len(self.eyes)):
             self.eyes[eye] = 0
 
@@ -150,7 +151,7 @@ class Creature(Agent):
         """This method updates the heading for the creature."""
         output: float = 0
         for i in range(self.evoflock.num_eyes):
-            output += self.genotype[i + (self.predator_in_eye * self.evoflock.num_eyes)] * self.eyes[i]
+            output += (self.genotype[i + (self.predator_in_eye * self.evoflock.num_eyes)] * self.eyes[i])
         new_heading: float = self.heading + output
         self.heading = self.wrap_360(new_heading)
 
@@ -169,11 +170,7 @@ class Creature(Agent):
                 else:
                     self.genotype[i] = self.evoflock.creatures[parent_b].genotype[i]
             except IndexError as e:
-                print(self.genotype[i])
-                print(self.evoflock.creatures[parent_a].genotype[i])
-                print(self.evoflock.creatures[parent_b].genotype[i])
-                print(i)
-                quit()
+                print(e)
 
     def mutate(self):
         """This method is for performing mutation, where random genomes are changed."""
@@ -194,7 +191,6 @@ class Predator(Agent):
     def update_predator(self):
         """This method finds the nearest creature to the predator and creates a new create via crossover
         and mutation if the creature gets caught."""
-        self.nearest_creature: int = -1
         self.nearest_creature_distance: float = 999
         self.nearest_creature_heading: float = -1.0
         for creature in range(self.evoflock.num_creatures):
@@ -213,7 +209,7 @@ class Predator(Agent):
             d = math.sqrt((dx * dx) + (dy * dy))
 
             if d < self.nearest_creature_distance:
-                self.nearest_creature = creature
+                EvoFlock.closest_prey = creature
                 self.nearest_creature_distance = d
                 self.nearest_creature_heading = super().wrap_360(math.degrees(math.atan2(-dy, dx)))
 
@@ -221,16 +217,16 @@ class Predator(Agent):
             parent_a: int = random.randint(0, self.evoflock.num_creatures - 1)
             parent_b: int = random.randint(0, self.evoflock.num_creatures - 1)
             # Need to choose the creature that is not the one that just got caught
-            while parent_a is self.nearest_creature:
+            while parent_a is EvoFlock.closest_prey:
                 parent_a = random.randint(0, self.evoflock.num_creatures)
 
-            while parent_b is self.nearest_creature and parent_b is not parent_a:
+            while parent_b is EvoFlock.closest_prey and parent_b is not parent_a:
                 parent_b = random.randint(0, self.evoflock.num_creatures)
 
-            self.evoflock.creatures[self.nearest_creature].crossover(parent_a, parent_b)
-            self.evoflock.creatures[self.nearest_creature].mutate()
+            self.evoflock.creatures[EvoFlock.closest_prey].crossover(parent_a, parent_b)
+            self.evoflock.creatures[EvoFlock.closest_prey].mutate()
             self.evoflock.reproductions += 1
-            self.evoflock.creatures[self.nearest_creature].randomize_position_and_heading()
+            self.evoflock.creatures[EvoFlock.closest_prey].randomize_position_and_heading()
 
             self.randomize_position_and_heading()
 
