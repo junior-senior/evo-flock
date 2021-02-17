@@ -63,9 +63,9 @@ class EvoFlock:
         [c.update_position() for c in self.creatures]
         self.predator.update_predator()
         self.counter += 1
-        if self.counter % 1 == 0:
-            print("Counter = {counter}, Reproductions = {repos} ".format(counter=self.counter,
-                                                                         repos=self.reproductions))
+  #      if self.counter % 1 == 0:
+            # print("Counter = {counter}, Reproductions = {repos} ".format(counter=self.counter,
+            #                                                              repos=self.reproductions))
 
 
 class Agent:

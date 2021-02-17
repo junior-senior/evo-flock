@@ -22,19 +22,19 @@ class UserInterface(QtWidgets.QWidget):
 
     def init_ui(self):
         self.setGeometry(0, 0,
-                         screeninfo.get_monitors()[0].width,
-                         screeninfo.get_monitors()[0].height)
+                         600,
+                         600)
         self.setWindowTitle("EvoFlock")
 
         #self.showFullScreen()
 
-        self.user_settings_groupbox = QtWidgets.QGroupBox("Settings")
-        self.user_settings_groupbox.setMaximumSize(int(screeninfo.get_monitors()[0].width/5),
-                                                   screeninfo.get_monitors()[0].height)
+        # self.user_settings_groupbox = QtWidgets.QGroupBox("Settings")
+        # self.user_settings_groupbox.setMaximumSize(int(screeninfo.get_monitors()[0].width/5),
+        #                                            screeninfo.get_monitors()[0].height)
         self.simulation_window_groupbox = QtWidgets.QGroupBox("Simulation")
 
         self.main_window_layout = QtWidgets.QHBoxLayout()
-        self.main_window_layout.addWidget(self.user_settings_groupbox)
+#        self.main_window_layout.addWidget(self.user_settings_groupbox)
         self.main_window_layout.addWidget(self.simulation_window_groupbox)
         self.setLayout(self.main_window_layout)
 
@@ -55,7 +55,7 @@ class UserInterface(QtWidgets.QWidget):
     def start_animation(self):
         """Start the animation timer.
         """
-        self.timer.start(100)
+        self.timer.start(15)
 
     def stop_animation(self):
         """Stop the animation timer.
@@ -79,8 +79,8 @@ class UserInterface(QtWidgets.QWidget):
         """Create the world space.
         """
         self.scene.setSceneRect(QtCore.QRectF(0, 0,
-                                              self.simulation_window_groupbox.size().width() - 100,
-                                              self.simulation_window_groupbox.size().height() - 100))
+                                              self.simulation_window_groupbox.size().width() - 50,
+                                              self.simulation_window_groupbox.size().height() - 50))
 
         self.graphics_container.fitInView(self.scene.itemsBoundingRect())
 
@@ -103,8 +103,8 @@ class UserInterface(QtWidgets.QWidget):
         y = creature.y_position
         world_left = 0
         world_top = 0
-        world_right = self.simulation_window_groupbox.size().width() - 100
-        world_bottom = self.simulation_window_groupbox.size().height() - 100
+        world_right = self.simulation_window_groupbox.size().width()
+        world_bottom = self.simulation_window_groupbox.size().height()
         creature_x_in_world = int(((world_right - world_left) * x) + world_left)
         creature_y_in_world = int(((world_bottom - world_top) * y) + world_top)
         item = QtWidgets.QGraphicsRectItem(creature_x_in_world, creature_y_in_world, 10, 10)
