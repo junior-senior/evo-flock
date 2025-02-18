@@ -5,7 +5,7 @@ from decimal import Decimal
 class EvoFlock:
     """EvoFlock is a simulation of a predator-prey scenario where the prey are subject to an Evolutionary Algorithm.
     Each time a prey is caught, a new one is produced via crossover and mutation."""
-    def __init__(self, bounded=True, selection_method='Rank', randomness_factor=0.1, tournament_size=3,
+    def __init__(self, bounded=True, num_creatures=50, selection_method='Rank', randomness_factor=0.1, tournament_size=3,
                  predator_type='simple', creature_type='simple'):
         self.counter: int = 0
         self.reproductions: int = 0
@@ -15,7 +15,7 @@ class EvoFlock:
         self.creature_speed: float = 0.01
         self.predator_speed: float = 0.013
         self.creature_diameter: float = 0.015
-        self.num_creatures: int = 50
+        self.num_creatures: int = num_creatures
 
         self.num_eyes: int = 8
         self.genotype_length: int = self.num_eyes**2
