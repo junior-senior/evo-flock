@@ -12,7 +12,6 @@ import screeninfo
 
 import EvoFlock
 
-
 class UserInterface(QtWidgets.QWidget):
 
     def __init__(self, evo_flock):
@@ -24,14 +23,14 @@ class UserInterface(QtWidgets.QWidget):
         self.setGeometry(0, 0,
                          600,
                          600)
-        self.setWindowTitle("EvoFlock")
-
+        self.setWindowTitle(f"EvoFlock")
         #self.showFullScreen()
 
         # self.user_settings_groupbox = QtWidgets.QGroupBox("Settings")
         # self.user_settings_groupbox.setMaximumSize(int(screeninfo.get_monitors()[0].width/5),
         #                                            screeninfo.get_monitors()[0].height)
-        self.simulation_window_groupbox = QtWidgets.QGroupBox("Simulation")
+        sim_details_string = f'Bounded: {self.evo_flock.bounded}, # Creatures: {self.evo_flock.num_creatures}, Selection: {self.evo_flock.selection_method}'
+        self.simulation_window_groupbox = QtWidgets.QGroupBox(f"{sim_details_string}")
 
         self.main_window_layout = QtWidgets.QHBoxLayout()
 #        self.main_window_layout.addWidget(self.user_settings_groupbox)
@@ -55,7 +54,7 @@ class UserInterface(QtWidgets.QWidget):
     def start_animation(self):
         """Start the animation timer.
         """
-        self.timer.start(15)
+        self.timer.start(10)
 
     def stop_animation(self):
         """Stop the animation timer.
@@ -91,7 +90,6 @@ class UserInterface(QtWidgets.QWidget):
         for creature in self.evo_flock.creatures:
             if self.evo_flock.creatures.index(creature) == self.evo_flock.closest_prey:
                 self.draw_creatures(True, creature)
-                print("Closest Prey:", self.evo_flock.closest_prey)
             else:
                 self.draw_creatures(True, creature)  # Draw Creatures
         self.draw_creatures(False, self.evo_flock.predator)  # Draw Predator
@@ -103,8 +101,8 @@ class UserInterface(QtWidgets.QWidget):
         y = creature.y_position
         world_left = 0
         world_top = 0
-        world_right = self.simulation_window_groupbox.size().width()
-        world_bottom = self.simulation_window_groupbox.size().height()
+        world_right = self.simulation_window_groupbox.size().width() - 60
+        world_bottom = self.simulation_window_groupbox.size().height() - 60
         creature_x_in_world = int(((world_right - world_left) * x) + world_left)
         creature_y_in_world = int(((world_bottom - world_top) * y) + world_top)
         item = QtWidgets.QGraphicsRectItem(creature_x_in_world, creature_y_in_world, 10, 10)
@@ -122,7 +120,12 @@ class UserInterface(QtWidgets.QWidget):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    evoflock = EvoFlock.EvoFlock()
+    bounded = False
+    selection_method = 'rank' # random, tournament
+    randomness_factor = 0.1
+    tournament_size = 3
+    evoflock = EvoFlock.EvoFlock(bounded=bounded, selection_method=selection_method,
+                                 randomness_factor=randomness_factor, tournament_size=tournament_size)
     ex = UserInterface(evoflock)
     sys.exit(app.exec_())
 
