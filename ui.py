@@ -29,7 +29,7 @@ class UserInterface(QtWidgets.QWidget):
         # self.user_settings_groupbox = QtWidgets.QGroupBox("Settings")
         # self.user_settings_groupbox.setMaximumSize(int(screeninfo.get_monitors()[0].width/5),
         #                                            screeninfo.get_monitors()[0].height)
-        sim_details_string = f'Bounded: {self.evo_flock.bounded}, # Creatures: {self.evo_flock.num_creatures}, Selection: {self.evo_flock.selection_method}'
+        sim_details_string = (f'Bounded: {self.evo_flock.bounded}, # Creatures: {self.evo_flock.num_creatures}, Selection: {self.evo_flock.selection_method}')
         self.simulation_window_groupbox = QtWidgets.QGroupBox(f"{sim_details_string}")
 
         self.main_window_layout = QtWidgets.QHBoxLayout()
@@ -121,11 +121,15 @@ class UserInterface(QtWidgets.QWidget):
 def main():
     app = QtWidgets.QApplication(sys.argv)
     bounded = False
+    num_creatures = 50
     selection_method = 'rank' # random, tournament
     randomness_factor = 0.1
     tournament_size = 3
-    evoflock = EvoFlock.EvoFlock(bounded=bounded, selection_method=selection_method,
-                                 randomness_factor=randomness_factor, tournament_size=tournament_size)
+    predator_type = 'simple'
+    creature_type = 'simple'
+    evoflock = EvoFlock.EvoFlock(bounded=bounded, num_creatures=num_creatures, selection_method=selection_method,
+                                 randomness_factor=randomness_factor, tournament_size=tournament_size,
+                                 predator_type=predator_type, creature_type=creature_type)
     ex = UserInterface(evoflock)
     sys.exit(app.exec_())
 
