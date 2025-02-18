@@ -5,7 +5,8 @@ from decimal import Decimal
 class EvoFlock:
     """EvoFlock is a simulation of a predator-prey scenario where the prey are subject to an Evolutionary Algorithm.
     Each time a prey is caught, a new one is produced via crossover and mutation."""
-    def __init__(self, bounded=True, selection_method='Rank', randomness_factor=0.1, tournament_size=3):
+    def __init__(self, bounded=True, selection_method='Rank', randomness_factor=0.1, tournament_size=3,
+                 predator_type='simple', creature_type='simple'):
         self.counter: int = 0
         self.reproductions: int = 0
         self.bounded = bounded
@@ -19,15 +20,17 @@ class EvoFlock:
         self.num_eyes: int = 8
         self.genotype_length: int = self.num_eyes**2
 
-        self.creatures = []
-        self.create_creatures()
-        self.predator = Predator(self)
-
         self.selection_method = selection_method
         self.selection_randomness = randomness_factor
         self.selection_tournament_size = tournament_size
+        self.predator_type = predator_type
+        self.creature_type = creature_type
 
         self.closest_prey = -1
+        self.creatures = []
+        self.create_creatures()
+        self.best_creature = 0
+        self.predator = Predator(self)
 
     @staticmethod
     def random_int(n: int):
@@ -121,6 +124,7 @@ class EvoFlock:
         [c.update_position() for c in self.creatures]
         [c.resolve_collisions() for c in self.creatures]
         [c.update_lifespan() for c in self.creatures]
+        self.best_creature = max(self.creatures, key=lambda creature: creature.lifespan).lifespan
         self.predator.update_predator()
 
 class Agent:
@@ -280,6 +284,39 @@ class Predator(Agent):
     def __init__(self, evoflock):
         super().__init__(evoflock)
         self.speed = evoflock.predator_speed
+        self.predator_type = evoflock.predator_type
+        self.eyes = [0] * evoflock.num_eyes
+
+    def which_eye(self, x: float, y: float) -> int:
+        """This method is used to determine which eye the predator is seen in for this creature."""
+        dx: float = x - self.x_position
+        dy: float = y - self.y_position
+
+        if not self.evoflock.bounded:
+            if dx < -0.5:
+                dx += 1
+            elif dx > 0.5:
+                dx -= 1
+
+            if dy < -0.5:
+                dy += 1
+            elif dy > 0.5:
+                dy -= 1
+
+        angle = math.degrees(math.atan2(-dy, dx)) - self.heading
+        dh: float = self.wrap_360(angle)
+        return int(((dh * self.evoflock.num_eyes) / 360))
+
+    def update_eyes(self):
+
+        self.eyes = [0] * self.evoflock.num_eyes
+
+        for c in self.evoflock.creatures:
+            if c is not self:
+                eye_index = self.which_eye(c.x_position, c.y_position)
+                if eye_index != -1:
+                    self.eyes[eye_index] += 1
+
 
     def update_predator(self):
         """This method finds the nearest creature to the predator and creates a new creature via crossover
