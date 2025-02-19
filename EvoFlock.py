@@ -3,7 +3,8 @@ import math
 
 class EvoFlock:
     """EvoFlock is a simulation of a predator-prey scenario where the prey are subject to an Evolutionary Algorithm.
-    Each time a prey is caught, a new one is produced via crossover and mutation."""
+    Each time a prey is caught, a new one is produced via crossover and mutation. Over time, the prey (creatures) will
+    evolve to flock together away from the predator."""
     def __init__(self, bounded=True, num_creatures=50, selection_method='Rank', randomness_factor=0.1, tournament_size=3,
                  predator_type='simple', creature_type='simple'):
         self.counter: int = 0
@@ -107,6 +108,8 @@ class EvoFlock:
         return parent_a, parent_b
 
     def create_new_creature(self):
+        """When a creature is caught by the predator, a new creature must be made. The parents are selected,
+        crossover and mutation is applied and then it is released into the world with a random position and heading."""
         parent_a, parent_b = self.select_parents()
 
         self.creatures[self.closest_prey].crossover(parent_a, parent_b)
@@ -287,7 +290,7 @@ class Predator(Agent):
         self.eyes = [0] * evoflock.num_eyes
 
     def which_eye(self, x: float, y: float) -> int:
-        """This method is used to determine which eye the predator is seen in for this creature."""
+        """This method is used to determine which eye the craetures are seen in for this predator."""
         dx: float = x - self.x_position
         dy: float = y - self.y_position
 
