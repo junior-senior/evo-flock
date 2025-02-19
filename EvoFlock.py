@@ -31,22 +31,27 @@ class EvoFlock:
         self.best_creature = 0
         self.predator = Predator(self)
 
+    @staticmethod
     def random_int(n: int):
         """Returns a random integer between 0 and n-1."""
         return random.randint(0, n)
 
+    @staticmethod
     def random_float(d: float):
         """Returns a random double in the range [0, d)."""
         return random.uniform(0, d)
 
+    @staticmethod
     def random_gaussian(d: float):
         """Returns a Gaussian-random double in the rand, mean 0, stdev d."""
         return d * random.gauss(0, d)
 
+    @staticmethod
     def cos_degrees(h: float):
         """Gets the cos of an angle in degrees."""
         return math.cos(math.radians(h))
 
+    @staticmethod
     def sin_degrees(h: float):
         """Gets the sin of an angle in degrees."""
         return math.sin(math.radians(h))
@@ -61,11 +66,12 @@ class EvoFlock:
         method = self.selection_method
         if method == 'random':
             # Random selection
-            while parent_a is self.closest_prey or parent_a is None:
-                parent_a = random.randint(0, self.num_creatures - 1)
-
-            while parent_b is self.closest_prey or parent_b is parent_a or parent_b is None:
-                parent_b = random.randint(0, self.num_creatures - 1)
+            # While parent_a is the caught creature or None select a new creature
+            while (parent_a := self.creatures[random.randint(0, self.num_creatures - 1)]) is self.closest_prey or parent_a is None:
+                pass
+            # While parent_b is the caught creature, parent_a or None select a new creature
+            while (parent_b := self.creatures[random.randint(0, self.num_creatures - 1)]) is self.closest_prey or parent_b is parent_a or parent_b is None:
+                pass
 
         elif method == 'rank':
             randomness_factor = self.selection_randomness
@@ -75,7 +81,7 @@ class EvoFlock:
             rank_sum = n * (n + 1) / 2
             selection_probabilities = [(n - i) / rank_sum for i in range(n)]
 
-            def select_individual():
+            def select_individual(randomness_factor):
                 rand = random.random() * (1 - randomness_factor) + randomness_factor * random.random()
                 cumulative_probability = 0.0
                 for individual, probability in zip(ranked_population, selection_probabilities):
@@ -83,8 +89,9 @@ class EvoFlock:
                     if rand < cumulative_probability:
                         return individual
 
-            parent_a = select_individual()
-            while (parent_b := select_individual()) is parent_a or parent_b is self.closest_prey:
+            while (parent_a := select_individual(randomness_factor)) is self.closest_prey:
+                pass
+            while (parent_b := select_individual(randomness_factor)) is parent_a or parent_b is self.closest_prey:
                 pass
 
         elif method == 'tournament':
@@ -94,7 +101,8 @@ class EvoFlock:
                 tournament = random.sample(self.creatures, tournament_size)
                 return max(tournament, key=lambda x: x.lifespan)
 
-            parent_a = select_individual()
+            while (parent_a := select_individual()) is self.closest_prey:
+                pass
             while (parent_b := select_individual()) is parent_a or parent_b is self.closest_prey:
                 pass
 
@@ -102,14 +110,14 @@ class EvoFlock:
 
     def create_new_creature(self):
         """When a creature is caught by the predator, a new creature must be made. The parents are selected,
-        crossover and mutation is applied and then it is released into the world with a random position and heading."""
+        crossover and mutation is applied, then it is released into the world with a random position and heading."""
         parent_a, parent_b = self.select_parents()
 
-        self.creatures[self.closest_prey].crossover(parent_a, parent_b)
-        self.creatures[self.closest_prey].mutate()
+        self.closest_prey.crossover(parent_a, parent_b)
+        self.closest_prey.mutate()
         self.reproductions += 1
-        self.creatures[self.closest_prey].randomize_position()
-        self.creatures[self.closest_prey].randomize_heading()
+        self.closest_prey.randomize_position()
+        self.closest_prey.randomize_heading()
 
     def main_loop(self):
         """Main loop of the application, updates the eyes, heading and positions of each prey before updating the
@@ -336,7 +344,7 @@ class Predator(Agent):
             d = math.sqrt((dx * dx) + (dy * dy))
 
             if d < self.nearest_creature_distance:
-                self.evoflock.closest_prey = creature
+                self.evoflock.closest_prey = self.evoflock.creatures[creature]
                 self.nearest_creature_distance = d
                 self.nearest_creature_heading = self.wrap_360(math.degrees(math.atan2(-dy, dx)))
 
