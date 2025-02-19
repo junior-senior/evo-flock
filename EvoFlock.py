@@ -7,7 +7,6 @@ class EvoFlock:
     evolve to flock together away from the predator."""
     def __init__(self, bounded=True, num_creatures=50, selection_method='Rank', randomness_factor=0.1, tournament_size=3,
                  predator_type='simple', creature_type='simple'):
-        self.counter: int = 0
         self.reproductions: int = 0
         self.bounded = bounded
 
@@ -32,27 +31,22 @@ class EvoFlock:
         self.best_creature = 0
         self.predator = Predator(self)
 
-    @staticmethod
     def random_int(n: int):
         """Returns a random integer between 0 and n-1."""
         return random.randint(0, n)
 
-    @staticmethod
     def random_float(d: float):
         """Returns a random double in the range [0, d)."""
         return random.uniform(0, d)
 
-    @staticmethod
     def random_gaussian(d: float):
         """Returns a Gaussian-random double in the rand, mean 0, stdev d."""
         return d * random.gauss(0, d)
 
-    @staticmethod
     def cos_degrees(h: float):
         """Gets the cos of an angle in degrees."""
         return math.cos(math.radians(h))
 
-    @staticmethod
     def sin_degrees(h: float):
         """Gets the sin of an angle in degrees."""
         return math.sin(math.radians(h))
