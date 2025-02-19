@@ -1,6 +1,5 @@
 import random
 import math
-from decimal import Decimal
 
 class EvoFlock:
     """EvoFlock is a simulation of a predator-prey scenario where the prey are subject to an Evolutionary Algorithm.
@@ -324,8 +323,8 @@ class Predator(Agent):
         self.nearest_creature_distance: float = 999
         self.nearest_creature_heading: float = -1.0
         for creature in range(self.evoflock.num_creatures):
-            dx = Decimal(str(self.evoflock.creatures[creature].x_position)) - Decimal(str(self.x_position))
-            dy = Decimal(str(self.evoflock.creatures[creature].y_position)) - Decimal(str(self.y_position))
+            dx = float(self.evoflock.creatures[creature].x_position - self.x_position)
+            dy = float(self.evoflock.creatures[creature].y_position - self.y_position)
 
             if not self.evoflock.bounded:
                 if dx < -0.5:
