@@ -53,8 +53,7 @@ class EvoFlock:
 
     def create_creatures(self):
         """Creates the population of prey"""
-        for _ in range(self.num_creatures):
-            self.creatures.append(Creature(self))
+        [self.creatures.append(Creature(self)) for _ in range(self.num_creatures)]
 
     def select_parents(self):
         """Selects two parents based on the specified method."""
