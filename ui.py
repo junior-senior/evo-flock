@@ -105,11 +105,11 @@ class UserInterface(QtWidgets.QWidget):
         world_bottom = self.simulation_window_groupbox.size().height() - 60
         creature_x_in_world = int(((world_right - world_left) * x) + world_left)
         creature_y_in_world = int(((world_bottom - world_top) * y) + world_top)
-        item = QtWidgets.QGraphicsRectItem(creature_x_in_world, creature_y_in_world, 10, 10)
+        item = QtWidgets.QGraphicsRectItem(creature_x_in_world, creature_y_in_world, creature.size*700, creature.size*700)
         if creature_or_predator:
-            item.setBrush(QtGui.QBrush(QtCore.Qt.blue))
+            item.setBrush(QtGui.QBrush(QtCore.Qt.green))
         else:
-            item.setBrush(QtGui.QBrush(QtCore.Qt.red))
+            item.setBrush(QtGui.QBrush(QtCore.Qt.black))
         self.scene.addItem(item)
 
     def animate(self):
@@ -120,12 +120,12 @@ class UserInterface(QtWidgets.QWidget):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    bounded = False
+    bounded = True
     num_creatures = 50
-    selection_method = 'rank' # random, tournament
+    selection_method = 'rank' # random, rank, tournament
     randomness_factor = 0.1
     tournament_size = 3
-    predator_type = 'simple'
+    predator_type = 'advanced'
     creature_type = 'simple'
     evoflock = EvoFlock.EvoFlock(bounded=bounded, num_creatures=num_creatures, selection_method=selection_method,
                                  randomness_factor=randomness_factor, tournament_size=tournament_size,
